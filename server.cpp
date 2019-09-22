@@ -93,32 +93,40 @@ int main(int argc, char *argv[])
         memset(&msg, 0, sizeof(msg));//clear the buffer
         bytesRead += recv(newSd, (char*)&msg, sizeof(msg), 0);
         
-        cout << "Client enviou: " << msg << endl;
         
+
         string data;
-        switch(atoi(msg)){
-        case 1:
-            data = "Daniel, Josué e Beatriz";
-            break;
-        case 2:
-            data = curr_date();
-            break;
-        case 3:
-            data = curr_time();
-            break;
-        case 4:        
+        if(atoi(msg) != 0){
+            cout << "Client enviou: " << msg << endl;
+            switch(atoi(msg)){
+            case 1:
+                data = "Daniel, Josué e Beatriz";
+                break;
+            case 2:
+                data = curr_date();
+                break;
+            case 3:
+                data = curr_time();
+                break;
+            case 4:        
+                close(newSd);
+                close(serverSd);
+                return 0; 
+            default:
+                data = "Não compreendi a sua solicitação!";
+                break;
+            }	
+            memset(&msg, 0, sizeof(msg)); //clear the buffer
+            strcpy(msg, data.c_str());    
+            //send the message to client
+            bytesWritten += send(newSd,(char*)&msg,strlen(msg),0);
+        }
+        else{
             close(newSd);
             close(serverSd);
-            return 0; 
-        default:
-            data = "Não compreendi a sua solicitação!";
-            break;
-        }	
+            return 0;             
+        }
 
-        // memset(&msg, 0, sizeof(msg)); //clear the buffer
-        strcpy(msg, data.c_str());    
-        //send the message to client
-        bytesWritten += send(newSd,(char*)&msg,strlen(msg),0);
     }
     //we need to close the socket descriptors after we're all done
     close(newSd);

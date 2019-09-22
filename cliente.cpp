@@ -41,24 +41,22 @@ int main(int argc, char *argv[])
         cout << "[2] Qual é a data de hoje?" << endl;
         cout << "[3] Que horas são?" << endl;
         cout << "[4] Sair." << endl;
-
         getline(cin, data);
-    
-        cout << atoi(data.c_str()) << endl;
         if(atoi(data.c_str()) == 4){
             close(clientSd);
-            exit(0);   
-        } 
+            return 0;
+        }
 
-        
+
         memset(&msg, 0, sizeof(msg));//clear the buffer
         strcpy(msg, data.c_str());    
         bytesWritten += send(clientSd, (char*)&msg, strlen(msg), 0);
 
-        // cout << "Esperando resposta do servidor..." << endl;
         memset(&msg, 0, sizeof(msg));//clear the buffer
         bytesRead += recv(clientSd, (char*)&msg, sizeof(msg), 0);
 
+
+        cout << "aqui: " << atoi(msg) << endl;
         cout << "\nResposta: " << msg << endl;
     }
     close(clientSd);
