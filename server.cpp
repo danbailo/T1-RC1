@@ -86,18 +86,16 @@ int main(int argc, char *argv[])
     //also keep track of the amount of data sent as well
     int bytesRead, bytesWritten = 0;
     
-    while(1){
-        //receive a message from the client (listen)
-        cout << "\nEm que posso ajudar?" << endl;
-
+    bool flag = true;
+    while(flag){
         memset(&msg, 0, sizeof(msg));//clear the buffer
-        bytesRead += recv(newSd, (char*)&msg, sizeof(msg), 0);
-        
-        
+        bytesRead += recv(newSd, (char*)&msg, sizeof(msg), 0);            
 
         string data;
         if(atoi(msg) != 0){
-            cout << "Client enviou: " << msg << endl;
+            //receive a message from the client (listen)
+
+            cout << "\nCliente enviou: " << msg << endl;
             switch(atoi(msg)){
             case 1:
                 data = "Daniel, Josué e Beatriz";
@@ -108,10 +106,9 @@ int main(int argc, char *argv[])
             case 3:
                 data = curr_time();
                 break;
-            case 4:        
-                close(newSd);
-                close(serverSd);
-                return 0; 
+            case 4:
+                data = "Muito obrigado por utilizar nossos serviços!";
+                break;
             default:
                 data = "Não compreendi a sua solicitação!";
                 break;
@@ -121,12 +118,7 @@ int main(int argc, char *argv[])
             //send the message to client
             bytesWritten += send(newSd,(char*)&msg,strlen(msg),0);
         }
-        else{
-            close(newSd);
-            close(serverSd);
-            return 0;             
-        }
-
+        else flag = false;
     }
     //we need to close the socket descriptors after we're all done
     close(newSd);
