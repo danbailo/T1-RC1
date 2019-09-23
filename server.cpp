@@ -150,12 +150,15 @@ int main(int argc, char *argv[]){
     //Configura o socket;
     int bindStatus = bind(port, serverSd);
 
-    //Recebe uma conexão;
-    int client = connect(serverSd);
-
-    //Realiza o serviço;
-    service(client);
-
+    int state = 0;
+    while(!state){
+        //Recebe uma conexão;
+        int client = connect(serverSd);
+        //Realiza o serviço;
+        service(client);
+        cout << "Deseja desligar o servidor? [1]Sim / [0]Não" << endl;
+        cin >> state;       
+    }
     // Fecha os descritores do socket depois de tudo pronto.
     close(serverSd);
     return 0;   
