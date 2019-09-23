@@ -48,7 +48,7 @@ int main(int argc, char *argv[]){
     servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     servAddr.sin_port = htons(port);
  
-    //Ssocket orientado a fluxo aberto com endereço da Internet e também acompanha o descritor de socket
+    //Socket orientado a fluxo aberto com endereço da Internet e também acompanha o descritor de socket
     int serverSd = socket(AF_INET, SOCK_STREAM, 0);
     if(serverSd < 0){
         cerr << "Erro estabelecendo socket do servidor!" << endl;
@@ -110,6 +110,7 @@ int main(int argc, char *argv[]){
             case 4:
                 data = "Muito obrigado por utilizar nossos serviços!";
                 state = 0;
+                close(newSd);
                 break;
             default:
                 data = "Não compreendi a sua solicitação!";
@@ -131,7 +132,6 @@ int main(int argc, char *argv[]){
         // }
     }
     // Fecha os descritores do socket depois de tudo pronto.
-    close(newSd);
     close(serverSd);
     return 0;   
 }
