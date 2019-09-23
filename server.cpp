@@ -26,45 +26,11 @@ string curr_time(){
     return buf;
 }
 
-//Lado do Servidor
-int main(int argc, char *argv[]){
-
-    //Nessa parte iremos forçar o usuário entrar com a porta do servidor.
-    if(argc != 2){
-        cerr << "Informe uma porta para executar" << endl;
-        exit(0);
-    }
-
-    //Atribui a Porta infomada pelo usuário a esta variável.
-    int port = atoi(argv[1]);
-    
-    //Cria um buffer para enviar e receber dados(mensagens);
-    char msg[1500];
-     
-    //Configura o socket e as ferramentas de conexão.
-    sockaddr_in servAddr;
-    bzero((char*)&servAddr, sizeof(servAddr));
-    servAddr.sin_family = AF_INET;
-    servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    servAddr.sin_port = htons(port);
- 
-    //Socket orientado a fluxo aberto com endereço da Internet e também acompanha o descritor de socket
-    int serverSd = socket(AF_INET, SOCK_STREAM, 0);
-    if(serverSd < 0){
-        cerr << "Erro estabelecendo socket do servidor!" << endl;
-        exit(0);
-    }
-
-    //Vincula o socket com o endereço local.
-    int bindStatus = bind(serverSd, (struct sockaddr*) &servAddr, sizeof(servAddr));
-    if(bindStatus < 0){
-        cerr << "Erro ao criar socket com porta! tente outra." << endl;
-        exit(0);
-    }
+int connect(int server){
     cout << "Esperando o cliente se conectar..." << endl;
 
     //Aceita até 5 solicitações por vez.
-    listen(serverSd, 5);
+    listen(server, 5);
 
     //Recebe uma solicitação do cliente usando a função "accept".
     //Precisamos de um novo endereço para conectar com o cliente.
@@ -72,16 +38,48 @@ int main(int argc, char *argv[]){
     socklen_t newSockAddrSize = sizeof(newSockAddr);
 
     // "accept", cria um novo descritor de soquete para manipular a nova conexão com o cliente.
-    int newSd = accept(serverSd, (sockaddr *)&newSockAddr, &newSockAddrSize);
+    int newSd = accept(server, (sockaddr *)&newSockAddr, &newSockAddrSize);
     if(newSd < 0){
         cerr << "Erro aceitando requisicao do cliente!" << endl;
         exit(1);
     }
     cout << "Cliente conectado!" << endl;
+    return newSd;    
+}
+
+int server(){
+    //Socket orientado a fluxo aberto com endereço da Internet e também acompanha o descritor de socket
+    int server = socket(AF_INET, SOCK_STREAM, 0);
+    if(server < 0){
+        cerr << "Erro estabelecendo socket do servidor!" << endl;
+        exit(0);
+    }
+    return server;
+}
+
+int bind(int port, int serverSd){
+    //Configura o socket e as ferramentas de conexão.
+    sockaddr_in servAddr;
+    bzero((char*)&servAddr, sizeof(servAddr));
+    servAddr.sin_family = AF_INET;
+    servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    servAddr.sin_port = htons(port);
+
+    //Vincula o socket com o endereço local.
+    int bindStatus = bind(serverSd, (struct sockaddr*) &servAddr, sizeof(servAddr));
+    if(bindStatus < 0){
+        cerr << "Erro ao criar socket com porta! tente outra." << endl;
+        exit(0);
+    }
+    return bindStatus;
+}
+
+void service(int newSd){
+    //Cria um buffer para enviar e receber dados(mensagens);
+    char msg[1500];
 
     //Acompanha a quantidade de dados enviados também.
     int bytesRead, bytesWritten = 0;
-    
     int state = 1;
     while(state){
         memset(&msg, 0, sizeof(msg));//Limpa o buffer.
@@ -131,6 +129,33 @@ int main(int argc, char *argv[]){
         //     state = 0; //Modifica o estado do automato para parar a execução.
         // }
     }
+}
+
+
+//Lado do Servidor
+int main(int argc, char *argv[]){
+
+    //Nessa parte iremos forçar o usuário entrar com a porta do servidor.
+    if(argc != 2){
+        cerr << "Informe uma porta para executar" << endl;
+        exit(0);
+    }
+
+    //Atribui a Porta infomada pelo usuário a esta variável.
+    int port = atoi(argv[1]);
+    
+    //Liga o servidor;
+    int serverSd = server();
+
+    //Configura o socket;
+    int bindStatus = bind(port, serverSd);
+
+    //Recebe uma conexão;
+    int client = connect(serverSd);
+
+    //Realiza o serviço;
+    service(client);
+
     // Fecha os descritores do socket depois de tudo pronto.
     close(serverSd);
     return 0;   
