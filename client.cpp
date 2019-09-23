@@ -6,21 +6,7 @@
 
 using namespace std;
 
-//Lado do Cliente
-int main(int argc, char *argv[]){
-
-    //Nessa parte iremos forçar o usuário entrar com o IP e porta do servidor.
-    if(argc != 3){
-        cerr << "Digite o IP(localhost) e a porta do servidor!" << endl; 
-        exit(0); 
-    } 
-    
-    //Atribui o IP e a Porta as seguintes variáveis.
-    char *serverIp = argv[1]; int port = atoi(argv[2]); 
-
-    //Cria um buffer(mensagem).
-    char msg[1500]; 
-    
+int client(char *serverIp, int port){
     //Configura o socket e as ferramentas de conexão.
     struct hostent* host = gethostbyname(serverIp); 
     sockaddr_in sendSockAddr;   
@@ -32,14 +18,13 @@ int main(int argc, char *argv[]){
 
     //Tenta conectar
     int status = connect(clientSd,(sockaddr*) &sendSockAddr, sizeof(sendSockAddr));
-    if(status < 0){
-        cout << "Erro ao conectar com o socket!" << endl;
-        cout << "Verifique se o servidor está ligado!" << endl;
-        cout << "Verifique se o IP e a porta do servidor estão corretos!" << endl;
-        return -1;
-    }
+    if(status < 0) return 0;
+    return clientSd;
+}
 
-    cout << "Conectado com o servidor!" << endl;
+int request(int clientSd){
+    //Cria um buffer(mensagem).
+    char msg[1500]; 
     int bytesRead, bytesWritten = 0;
 
     //Automato que contém dois estados, o inicial é um loop com as opções, e o final é 
@@ -47,7 +32,7 @@ int main(int argc, char *argv[]){
     int state = 1;
     while(state){
         string data = "";
-        cout << "\n[1] Qual é os integrantes deste grupo?" << endl;
+        cout << "\n[1] Qual são os integrantes deste grupo?" << endl;
         cout << "[2] Qual é a data de hoje?" << endl;
         cout << "[3] Que horas são?" << endl;
         cout << "[4] Sair." << endl;
@@ -65,6 +50,31 @@ int main(int argc, char *argv[]){
         //Opção para finalizar a conexão com o servidor.
         if(atoi(data.c_str()) == 4) state = 0;
     }
+    return state;
+}
+
+//Lado do Cliente
+int main(int argc, char *argv[]){
+
+    //Nessa parte iremos forçar o usuário entrar com o IP e porta do servidor.
+    if(argc != 3){
+        cerr << "Digite o IP(localhost) e a porta do servidor!" << endl; 
+        exit(0); 
+    } 
+    
+    //Atribui o IP e a Porta as seguintes variáveis.
+    char *serverIp = argv[1]; int port = atoi(argv[2]); 
+
+    int clientSd = client(serverIp, port);
+    if (!clientSd){
+        cout << "Erro ao conectar com o socket!" << endl;
+        cout << "Verifique se o servidor está ligado!" << endl;
+        cout << "Verifique se o IP e a porta do servidor estão corretos!" << endl;    
+        exit(-1);    
+    }
+    cout << "Conectado com o servidor!" << endl;
+
+    request(clientSd);
 
     //Finaliza a conexão com o servidor.
     close(clientSd);

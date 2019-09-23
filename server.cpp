@@ -6,47 +6,6 @@
 
 using namespace std;
 
-//Função para pegar a data do sistema.
-string curr_date(){
-    time_t     now = time(0);
-    struct tm  tstruct;
-    char       buf[80];
-    tstruct = *localtime(&now);
-    strftime(buf, sizeof(buf), "%d/%m/%Y", &tstruct);
-    return buf;
-}
-
-//Função para pegar a hora do sistema.
-string curr_time(){
-    time_t     now = time(0);
-    struct tm  tstruct;
-    char       buf[80];
-    tstruct = *localtime(&now);
-    strftime(buf, sizeof(buf), "%X", &tstruct);
-    return buf;
-}
-
-int connect(int server){
-    cout << "Esperando o cliente se conectar..." << endl;
-
-    //Aceita até 5 solicitações por vez.
-    listen(server, 5);
-
-    //Recebe uma solicitação do cliente usando a função "accept".
-    //Precisamos de um novo endereço para conectar com o cliente.
-    sockaddr_in newSockAddr;
-    socklen_t newSockAddrSize = sizeof(newSockAddr);
-
-    // "accept", cria um novo descritor de soquete para manipular a nova conexão com o cliente.
-    int newSd = accept(server, (sockaddr *)&newSockAddr, &newSockAddrSize);
-    if(newSd < 0){
-        cerr << "Erro aceitando requisicao do cliente!" << endl;
-        exit(1);
-    }
-    cout << "Cliente conectado!" << endl;
-    return newSd;    
-}
-
 int server(){
     //Socket orientado a fluxo aberto com endereço da Internet e também acompanha o descritor de socket
     int server = socket(AF_INET, SOCK_STREAM, 0);
@@ -74,6 +33,47 @@ int bind(int port, int serverSd){
     return bindStatus;
 }
 
+int connect(int server){
+    cout << "Esperando o cliente se conectar..." << endl;
+
+    //Aceita 1 solicitação por vez.
+    listen(server, 1);
+
+    //Recebe uma solicitação do cliente usando a função "accept".
+    //Precisamos de um novo endereço para conectar com o cliente.
+    sockaddr_in newSockAddr;
+    socklen_t newSockAddrSize = sizeof(newSockAddr);
+
+    // "accept", cria um novo descritor de soquete para manipular a nova conexão com o cliente.
+    int newSd = accept(server, (sockaddr *)&newSockAddr, &newSockAddrSize);
+    if(newSd < 0){
+        cerr << "Erro aceitando requisicao do cliente!" << endl;
+        exit(1);
+    }
+    cout << "Cliente conectado!" << endl;
+    return newSd;    
+}
+
+//Função para pegar a data do sistema.
+string curr_date(){
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%d/%m/%Y", &tstruct);
+    return buf;
+}
+
+//Função para pegar a hora do sistema.
+string curr_time(){
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%X", &tstruct);
+    return buf;
+}
+
 void service(int newSd){
     //Cria um buffer para enviar e receber dados(mensagens);
     char msg[1500];
@@ -82,53 +82,37 @@ void service(int newSd){
     int bytesRead, bytesWritten = 0;
     int state = 1;
     while(state){
+        string data;
+
         memset(&msg, 0, sizeof(msg));//Limpa o buffer.
         bytesRead += recv(newSd, (char*)&msg, sizeof(msg), 0);            
 
-        string data;
-
-        // cout << "msg: " << msg << endl;
-        // cout << "atoi msg: " << atoi(msg) << endl;
-
-        // Se ele enviar algo diferente das opções, vai retornar um 0 e não entra nesse if.
-        // if(atoi(msg) != 0){
-            cout << "nao entrei\n";
-            // Recebe uma mensagem do cliente(escuta).
-            cout << "\nCliente enviou: " << msg << endl;
-            switch(atoi(msg)){
-            case 1:
-                data = "Daniel, Josué e Beatriz";
-                break;
-            case 2:
-                data = curr_date();
-                break;
-            case 3:
-                data = curr_time();
-                break;
-            case 4:
-                data = "Muito obrigado por utilizar nossos serviços!";
-                state = 0;
-                close(newSd);
-                break;
-            default:
-                data = "Não compreendi a sua solicitação!";
-                break;
-            }	
-            memset(&msg, 0, sizeof(msg));//Limpa o buffer.
-            strcpy(msg, data.c_str());    
-            
-            //Envia a mensagem para o cliente.
-            bytesWritten += send(newSd,(char*)&msg,strlen(msg),0);
-        // }
-        // else{
-        //     cout << "ENTREI NO ELSE\n";
-        //     memset(&msg, 0, sizeof(msg));//Limpa o buffer.
-        //     strcpy(msg, data.c_str());    
-        //     //Envia a mensagem para o cliente.
-        //     bytesWritten += send(newSd,(char*)&msg,strlen(msg),0);
-        //     state = 0; //Modifica o estado do automato para parar a execução.
-        // }
+        cout << "\nCliente enviou: " << msg << endl;
+        switch(atoi(msg)){
+        case 1:
+            data = "Daniel, Josué e Beatriz";
+            break;
+        case 2:
+            data = curr_date();
+            break;
+        case 3:
+            data = curr_time();
+            break;
+        case 4:
+            data = "Muito obrigado por utilizar nossos serviços!";
+            state = 0;
+            break;
+        default:
+            data = "Não compreendi a sua solicitação!";
+            break;
+        }	
+        memset(&msg, 0, sizeof(msg));//Limpa o buffer.
+        strcpy(msg, data.c_str());    
+        
+        //Envia a mensagem para o cliente.
+        bytesWritten += send(newSd,(char*)&msg,strlen(msg),0);
     }
+    close(newSd);
 }
 
 
@@ -152,14 +136,16 @@ int main(int argc, char *argv[]){
 
     int state = 0;
     while(!state){
-        //Recebe uma conexão;
+        //Recebe uma conexão(cliente);
         int client = connect(serverSd);
+
         //Realiza o serviço;
         service(client);
+        cout << "O Cliente encerrou a conexão!" << endl;
         cout << "Deseja desligar o servidor? [1]Sim / [0]Não" << endl;
         cin >> state;       
     }
-    // Fecha os descritores do socket depois de tudo pronto.
+    // Fecha os descritores do socket depois de tudo pronto.(Desliga o servidor/porta pra qual ele foi vinculado)
     close(serverSd);
     return 0;   
 }
