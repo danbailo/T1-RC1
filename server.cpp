@@ -93,7 +93,7 @@ int main(int argc, char *argv[]){
         // cout << "atoi msg: " << atoi(msg) << endl;
 
         // Se ele enviar algo diferente das opções, vai retornar um 0 e não entra nesse if.
-        if(atoi(msg) != 0){
+        // if(atoi(msg) != 0){
             cout << "nao entrei\n";
             // Recebe uma mensagem do cliente(escuta).
             cout << "\nCliente enviou: " << msg << endl;
@@ -109,6 +109,7 @@ int main(int argc, char *argv[]){
                 break;
             case 4:
                 data = "Muito obrigado por utilizar nossos serviços!";
+                state = 0;
                 break;
             default:
                 data = "Não compreendi a sua solicitação!";
@@ -119,15 +120,15 @@ int main(int argc, char *argv[]){
             
             //Envia a mensagem para o cliente.
             bytesWritten += send(newSd,(char*)&msg,strlen(msg),0);
-        }
-        else{
-            cout << "ENTREI NO ELSE\n";
-            memset(&msg, 0, sizeof(msg));//Limpa o buffer.
-            strcpy(msg, data.c_str());    
-            //Envia a mensagem para o cliente.
-            bytesWritten += send(newSd,(char*)&msg,strlen(msg),0);
-            state = 0; //Modifica o estado do automato para parar a execução.
-        }
+        // }
+        // else{
+        //     cout << "ENTREI NO ELSE\n";
+        //     memset(&msg, 0, sizeof(msg));//Limpa o buffer.
+        //     strcpy(msg, data.c_str());    
+        //     //Envia a mensagem para o cliente.
+        //     bytesWritten += send(newSd,(char*)&msg,strlen(msg),0);
+        //     state = 0; //Modifica o estado do automato para parar a execução.
+        // }
     }
     // Fecha os descritores do socket depois de tudo pronto.
     close(newSd);
