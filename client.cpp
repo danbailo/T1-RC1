@@ -32,7 +32,7 @@ int request(int clientSd){
     int state = 1;
     while(state){
         string data = "";
-        cout << "\n[1] Qual são os integrantes deste grupo?" << endl;
+        cout << "\n[1] Quais são os integrantes deste grupo?" << endl;
         cout << "[2] Qual é a data de hoje?" << endl;
         cout << "[3] Que horas são?" << endl;
         cout << "[4] Sair." << endl;

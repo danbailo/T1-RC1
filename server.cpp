@@ -10,7 +10,7 @@ int server(){
     //Socket orientado a fluxo aberto com endereço da Internet e também acompanha o descritor de socket
     int server = socket(AF_INET, SOCK_STREAM, 0);
     if(server < 0){
-        cerr << "Erro estabelecendo socket do servidor!" << endl;
+        cerr << "Erro ao estabeler conexão com o socket do servidor!" << endl;
         exit(0);
     }
     return server;
@@ -27,7 +27,7 @@ int bind(int port, int serverSd){
     //Vincula o socket com o endereço local.
     int bindStatus = bind(serverSd, (struct sockaddr*) &servAddr, sizeof(servAddr));
     if(bindStatus < 0){
-        cerr << "Erro ao criar socket com porta! tente outra." << endl;
+        cerr << "Erro ao criar socket com esta porta! Por favor, tente outra." << endl;
         exit(0);
     }
     return bindStatus;
@@ -37,7 +37,7 @@ int connect(int server){
     cout << "Esperando o cliente se conectar..." << endl;
 
     //Aceita 1 solicitação por vez.
-    listen(server, 1);
+    listen(server, 2);
 
     //Recebe uma solicitação do cliente usando a função "accept".
     //Precisamos de um novo endereço para conectar com o cliente.
@@ -47,7 +47,7 @@ int connect(int server){
     // "accept", cria um novo descritor de soquete para manipular a nova conexão com o cliente.
     int newSd = accept(server, (sockaddr *)&newSockAddr, &newSockAddrSize);
     if(newSd < 0){
-        cerr << "Erro aceitando requisicao do cliente!" << endl;
+        cerr << "Erro ao aceitar requisição do cliente!" << endl;
         exit(1);
     }
     cout << "Cliente conectado!" << endl;
@@ -112,6 +112,7 @@ void service(int newSd){
         //Envia a mensagem para o cliente.
         bytesWritten += send(newSd,(char*)&msg,strlen(msg),0);
     }
+    //Fecha a conexão com este cliente.
     close(newSd);
 }
 
@@ -140,10 +141,9 @@ int main(int argc, char *argv[]){
         int client = connect(serverSd);
 
         //Realiza o serviço;
+        cout << "\nEm que posso ajudar?" << endl;
         service(client);
-        cout << "O Cliente encerrou a conexão!" << endl;
-        cout << "Deseja desligar o servidor? [1]Sim / [0]Não" << endl;
-        cin >> state;       
+        cout << "O Cliente encerrou a conexão!\n" << endl;   
     }
     // Fecha os descritores do socket depois de tudo pronto.(Desliga o servidor/porta pra qual ele foi vinculado)
     close(serverSd);
