@@ -3,11 +3,22 @@
 #include <netdb.h>
 #include <sys/wait.h>
 #include <iostream>
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 using namespace std;
 
+int server();
+int bind();
+int connect(int server);
+string curr_date();
+string curr_time();
+void service(int newSd);
+void handler(int s);
+
 int server(){
-    //Socket orientado a fluxo aberto com endereço da Internet e também acompanha o descritor de socket
+    //Socket orientado a fluxo aberto com endereço da Internet e também acompanha o descritor de socket.
     int server = socket(AF_INET, SOCK_STREAM, 0);
     if(server < 0){
         cerr << "Erro ao estabeler conexão com o socket do servidor!" << endl;
@@ -116,7 +127,6 @@ void service(int newSd){
     close(newSd);
 }
 
-
 //Lado do Servidor
 int main(int argc, char *argv[]){
 
@@ -135,17 +145,14 @@ int main(int argc, char *argv[]){
     //Configura o socket;
     int bindStatus = bind(port, serverSd);
 
-    int state = 0;
-    while(!state){
+    while(1){
         //Recebe uma conexão(cliente);
         int client = connect(serverSd);
 
         //Realiza o serviço;
         cout << "\nEm que posso ajudar?" << endl;
         service(client);
-        cout << "O Cliente encerrou a conexão!\n" << endl;   
+        cout << "O Cliente encerrou a conexão!\n" << endl; 
     }
-    // Fecha os descritores do socket depois de tudo pronto.(Desliga o servidor/porta pra qual ele foi vinculado)
-    close(serverSd);
     return 0;   
 }

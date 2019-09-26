@@ -6,6 +6,9 @@
 
 using namespace std;
 
+int client(char *serverIp, int port);
+int request(int clientSd);
+
 int client(char *serverIp, int port){
     //Configura o socket e as ferramentas de conexão.
     struct hostent* host = gethostbyname(serverIp); 
