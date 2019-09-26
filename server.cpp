@@ -48,7 +48,7 @@ int connect(int server){
     cout << "Esperando o cliente se conectar..." << endl;
 
     //Aceita 1 solicitação por vez.
-    listen(server, 2);
+    listen(server, 1);
 
     //Recebe uma solicitação do cliente usando a função "accept".
     //Precisamos de um novo endereço para conectar com o cliente.
